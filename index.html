@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GLOW IN RISE – Study Clock + Doubt Clear AI</title>
+<style>
+    :root{
+        --bg:#0f0f1a;
+        --neon:#00ffe5;
+        --fire:#ff3c00;
+        --glass:rgba(255,255,255,0.08);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;color:#fff}
+    body{
+        height:100vh;
+        display:flex;
+        flex-direction: column;
+        align-items:center;
+        justify-content:center;
+        background:var(--bg);
+        overflow:hidden;
+        position:relative;
+    }
+    /* Animated Background */
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, 
+            rgba(0, 255, 229, 0.05) 0%, 
+            rgba(255, 0, 230, 0.05) 50%, 
+            rgba(57, 255, 20, 0.05) 100%);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        z-index: -1;
+    }
+    @keyframes gradientBG {
+        0% {background-position: 0% 50%;}
+        50% {background-position: 100% 50%;}
+        100% {background-position: 0% 50%;}
+    }
+    /* Floating Particles */
+    .particle {
+        position: absolute;
+        background: rgba(0, 255, 229, 0.6);
+        border-radius: 50%;
+        filter: blur(1px);
+        animation: float linear infinite;
+        z-index: -1;
+    }
+    @keyframes float {
+        0% {transform: translateY(0) rotate(0deg);}
+        100% {transform: translateY(-100vh) rotate(360deg);}
+    }
+    /* TOP BAR */
+    #topBar{
+        position:fixed;
+        top:0;
+        left:0;
+        right:0;
+        height:60px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:0 25px;
+        background:var(--glass);
+        backdrop-filter:blur(10px);
+        z-index:1000
+    }
+    #timerDisplay{
+        font-size:1.7rem;
+        font-weight:700;
+        color:var(--neon);
+        letter-spacing:2px
+    }
+    #doubtBtn{
+        background: linear-gradient(45deg, #ff3c00, #ffdd00, #39ff14, #00bfff, #ff00e6, #00ffe5);
+        background-size: 400% 400%;
+        color:#000;
+        padding:8px 16px;
+        border-radius:20px;
+        font-weight:700;
+        margin-right:auto;
+        margin-left:20px;
+        border: none;
+        animation: rainbow 8s ease infinite;
+        box-shadow: 0 0 10px rgba(0,255,229,0.5);
+        position: relative;
+        overflow: hidden;
+    }
+    #doubtBtn::after {
+        content: "Solve your doubt with AI Teacher";
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--neon);
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+    #doubtBtn:hover::after {
+        top: -40px;
+        opacity: 1;
+    }
+    @keyframes rainbow {
+        0% {background-position: 0% 50%;}
+        50% {background-position: 100% 50%;}
+        100% {background-position: 0% 50%;}
+    }
+    #bankWrapper{
+        display:flex;
+        align-items:center;
+        gap:6px
+    }
+    #bankWrapper input{
+        width:110px;
+        padding:4px 8px;
+        border:none;
+        border-radius:4px;
+        background:var(--glass);
+        color:#fff;
+        text-align:right
+    }
+    /* BIG TIMER DISPLAY */
+    #bigTimer {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        color: var(--neon);
+        text-shadow: 0 0 10px rgba(0, 255, 229, 0.5);
+        letter-spacing: 3px;
+        position: relative;
+    }
+    #bigTimer::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, #ff3c00, #ffdd00, #39ff14, #00bfff, #ff00e6, #00ffe5);
+        background-size: 400% 400%;
+        animation: rainbow 8s ease infinite;
+        border-radius: 3px;
+    }
+    /* CLOCK */
+    #clockWrapper{
+        position:relative;
+        width:320px;
+        height:320px;
+        margin-top: 20px;
+    }
+    .ring{
+        position:absolute;
+        border-radius:50%;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        transition:all .6s ease
+    }
+    .ring svg{
+        width:100%;
+        height:100%;
+        transform:rotate(-90deg)
+    }
+    .ring circle{
+        fill:none;
+        stroke-width:6px;
+        stroke-linecap:round
+    }
+    #startRing{
+        width:300px;
+        height:300px
+    }
+    #startRing circle{
+        stroke:var(--neon);
+        stroke-dasharray:942;
+        stroke-dashoffset:942
+    }
+    #hourRing{
+        width:260px;
+        height:260px
+    }
+    #hourRing circle{
+        stroke:#00bfff
+    }
+    #minuteRing{
+        width:220px;
+        height:220px
+    }
+    #minuteRing circle{
+        stroke:#39ff14
+    }
+    #secondRing{
+        width:180px;
+        height:180px
+    }
+    #secondRing circle{
+        stroke:#ff00e6
+    }
+    #spinnerRing{
+        width:140px;
+        height:140px;
+        animation:spin 4s linear infinite
+    }
+    #spinnerRing circle{
+        stroke:url(#fireGradient);
+        stroke-width:4
+    }
+    @keyframes spin{
+        to{transform:translate(-50%,-50%) rotate(360deg)}
+    }
+    #centerText{
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        font-size:1.5rem;
+        font-weight:700;
+        text-align:center
+    }
+    button{
+        cursor:pointer;
+        border:none;
+        background:var(--neon);
+        color:#000;
+        padding:8px 18px;
+        border-radius:20px;
+        font-weight:700;
+        letter-spacing:.5px;
+        transition:.3s
+    }
+    button:hover{
+        transform:scale(1.05)
+    }
+    #muteBtn{
+        position:fixed;
+        bottom:20px;
+        right:20px;
+        background:var(--fire)
+    }
+    /* Motivation Box */
+    #motivationBox {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 600px;
+        background: rgba(26, 26, 46, 0.9);
+        border-radius: 12px;
+        padding: 15px 20px;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 500;
+        backdrop-filter: blur(5px);
+        transform: translate(-50%, 100px);
+        opacity: 0;
+        transition: all 0.5s ease;
+        z-index: 1000;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        background: linear-gradient(45deg, 
+            rgba(255, 60, 0, 0.2), 
+            rgba(255, 221, 0, 0.2), 
+            rgba(57, 255, 20, 0.2), 
+            rgba(0, 191, 255, 0.2), 
+            rgba(255, 0, 230, 0.2), 
+            rgba(0, 255, 229, 0.2));
+        background-size: 400% 400%;
+        animation: rainbowBg 15s ease infinite;
+    }
+    #motivationBox.show {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+    @keyframes rainbowBg {
+        0% {background-position: 0% 50%;}
+        50% {background-position: 100% 50%;}
+        100% {background-position: 0% 50%;}
+    }
+    /* DOUBT MODAL */
+    #doubtModal{
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.7);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        z-index:2000
+    }
+    #doubtBox{
+        width:90%;
+        max-width:500px;
+        background:#1a1a2e;
+        border:1px solid var(--neon);
+        border-radius:12px;
+        padding:20px;
+        display:flex;
+        flex-direction:column;
+        gap:12px
+    }
+    #doubtBox textarea{
+        width:100%;
+        min-height:100px;
+        background:#0f0f1a;
+        border:1px solid var(--neon);
+        border-radius:6px;
+        padding:8px;
+        color:#fff;
+        resize:vertical
+    }
+    #doubtBox #answer{
+        max-height:200px;
+        overflow-y:auto;
+        padding:8px;
+        border:1px solid #444;
+        border-radius:6px;
+        background:#111;
+        font-size:.95rem;
+        white-space:pre-wrap
+    }
+    .teacher-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .teacher-header h3 {
+        margin: 0;
+        color: var(--neon);
+    }
+    .teacher-icon {
+        width: 30px;
+        height: 30px;
+        background: var(--neon);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-weight: bold;
+    }
+    @media(max-width:400px){
+        #clockWrapper{width:260px;height:260px}
+        #doubtBtn {padding: 6px 12px; font-size: 0.9rem;}
+        #bigTimer {font-size: 2.5rem;}
+    }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header id="topBar">
+    <button id="doubtBtn">Ask AI Teacher</button>
+    <div id="timerDisplay">00:00</div>
+    <div id="bankWrapper">
+        <span>💰</span>
+        <input id="bankInput" type="number" placeholder="0" title="Today's bank balance"/>
+    </div>
+</header>
+
+<!-- BIG TIMER DISPLAY -->
+<div id="bigTimer">00:00</div>
+
+<!-- CLOCK -->
+<div id="clockWrapper">
+    <svg width="0" height="0">
+        <defs>
+            <linearGradient id="fireGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ff3c00"/>
+                <stop offset="100%" stop-color="#ffdd00"/>
+            </linearGradient>
+        </defs>
+    </svg>
+    <div class="ring" id="startRing"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="47"/></svg></div>
+    <div class="ring" id="hourRing"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="47"/></svg></div>
+    <div class="ring" id="minuteRing"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="47"/></svg></div>
+    <div class="ring" id="secondRing"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="47"/></svg></div>
+    <div class="ring" id="spinnerRing"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="47"/></svg></div>
+    <div id="centerText"><button id="ctrlBtn">START</button></div>
+</div>
+
+<!-- Motivation Box -->
+<div id="motivationBox"></div>
+
+<!-- MUTE -->
+<button id="muteBtn" title="Mute tick">🔊</button>
+
+<!-- DOUBT MODAL -->
+<div id="doubtModal">
+    <div id="doubtBox">
+        <div class="teacher-header">
+            <div class="teacher-icon">AI</div>
+            <h3>Your Personal AI Teacher ✨</h3>
+        </div>
+        <textarea id="question" placeholder="Type your question here... (e.g., Explain quantum physics in simple terms)"></textarea>
+        <button id="askBtn">Ask Teacher</button>
+        <div id="answer"></div>
+        <button id="closeBtn" style="background:#ff3c00">Close</button>
+    </div>
+</div>
+
+<audio id="tickSound" src="" preload="auto"></audio>
+
+<script>
+/* ---------- UTILS ---------- */
+const pad = n => n.toString().padStart(2, '0');
+
+/* ---------- MOTIVATION QUOTES ---------- */
+const motivationQuotes = [
+    "The expert in anything was once a beginner. Keep going!",
+    "Every minute you study is a step closer to your dreams.",
+    "Knowledge is power. You're building your superpower right now!",
+    "Small progress is still progress. Celebrate every step!",
+    "Your future self will thank you for this study session.",
+    "The only way to learn is to keep asking questions.",
+    "You don't have to be perfect, just persistent.",
+    "Every great achievement begins with the decision to try.",
+    "Stay focused. Your hard work will pay off.",
+    "Learning is a treasure that will follow you everywhere."
+];
+
+let lastQuoteTime = 0;
+const motivationBox = document.getElementById('motivationBox');
+const bigTimer = document.getElementById('bigTimer');
+
+function showMotivation() {
+    const minutes = Math.floor(elapsed / 60);
+    if (minutes > 0 && minutes % 15 === 0 && minutes !== lastQuoteTime) {
+        lastQuoteTime = minutes;
+        const randomQuote = motivationQuotes[Math.floor(Math.random() * motivationQuotes.length)];
+        motivationBox.textContent = randomQuote;
+        motivationBox.classList.add('show');
+        
+        setTimeout(() => {
+            motivationBox.classList.remove('show');
+        }, 10000);
+    }
+}
+
+/* ---------- FLOATING PARTICLES ---------- */
+function createParticles() {
+    const particlesCount = 20;
+    for (let i = 0; i < particlesCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Random size between 2px and 5px
+        const size = Math.random() * 3 + 2;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random position
+        particle.style.left = `${Math.random() * 100}vw`;
+        particle.style.top = `${Math.random() * 100}vh`;
+        
+        // Random animation duration
+        const duration = Math.random() * 20 + 10;
+        particle.style.animationDuration = `${duration}s`;
+        
+        // Random delay
+        particle.style.animationDelay = `${Math.random() * 5}s`;
+        
+        document.body.appendChild(particle);
+    }
+}
+
+/* ---------- ELEMENTS ---------- */
+const doubtBtn = document.getElementById('doubtBtn');
+const doubtModal = document.getElementById('doubtModal');
+const questionTA = document.getElementById('question');
+const answerDiv = document.getElementById('answer');
+const askBtn = document.getElementById('askBtn');
+const closeBtn = document.getElementById('closeBtn');
+
+/* ---------- DOUBT AI ---------- */
+doubtBtn.addEventListener('click', () => {
+    doubtModal.style.display = 'flex';
+    questionTA.focus();
+});
+
+closeBtn.addEventListener('click', () => {
+    doubtModal.style.display = 'none';
+});
+
+askBtn.addEventListener('click', async () => {
+    const q = questionTA.value.trim();
+    if (!q) return;
+    
+    answerDiv.textContent = "Your AI Teacher is thinking...";
+    
+    try {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer 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"
+            },
+            body: JSON.stringify({
+                model: "meta-llama/llama-4-maverick",
+                messages: [{
+                    role: "system",
+                    content: "You are a friendly and knowledgeable AI teacher. Explain concepts clearly and simply, using examples when helpful. Be encouraging and supportive. If the question is unclear, ask for clarification."
+                }, {
+                    role: "user",
+                    content: q
+                }],
+                stream: true
+            })
+        });
+        
+        const reader = res.body.getReader();
+        const dec = new TextDecoder();
+        let buffer = "";
+        answerDiv.textContent = "";
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += dec.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+            
+            for (const line of lines) {
+                if (line.startsWith("data: ")) {
+                    const data = line.slice(6);
+                    if (data === "[DONE]") continue;
+                    try {
+                        const json = JSON.parse(data);
+                        const delta = json.choices?.[0]?.delta?.content;
+                        if (delta) answerDiv.textContent += delta;
+                    } catch {}
+                }
+            }
+        }
+    } catch (e) {
+        answerDiv.textContent = "❌ Error: " + e.message;
+    }
+});
+
+/* ---------- TIMER / CLOCK ---------- */
+let running = false, elapsed = 0, timerInt, tickInt, muted = false;
+const timerDisplay = document.getElementById('timerDisplay');
+const bankInput = document.getElementById('bankInput');
+const tickSound = document.getElementById('tickSound');
+const muteBtn = document.getElementById('muteBtn');
+const ctrlBtn = document.getElementById('ctrlBtn');
+
+bankInput.value = localStorage.getItem('bank') || '';
+bankInput.addEventListener('input', e => localStorage.setItem('bank', e.target.value));
+
+function updateTimer() {
+    elapsed++;
+    const m = Math.floor(elapsed / 60), s = elapsed % 60;
+    const timeString = `${pad(m)}:${pad(s)}`;
+    timerDisplay.textContent = timeString;
+    bigTimer.textContent = timeString;
+    showMotivation();
+}
+
+function runClk() {
+    const now = new Date();
+    const h = now.getHours() % 12, m = now.getMinutes(), s = now.getSeconds();
+    setRing(hourRing, (h / 12) * 360, 360);
+    setRing(minuteRing, (m / 60) * 360, 360);
+    setRing(secondRing, (s / 60) * 360, 360);
+}
+
+function setRing(c, a, max) {
+    const len = 2 * Math.PI * 47, off = len - (a / max) * len;
+    c.style.strokeDasharray = len;
+    c.style.strokeDashoffset = off;
+}
+
+function animateRing(c, from, to, dur, cb) {
+    let st = null;
+    const step = ts => {
+        if (!st) st = ts;
+        const p = Math.min((ts - st) / dur, 1);
+        c.style.strokeDashoffset = from + (to - from) * p;
+        if (p < 1) requestAnimationFrame(step); else cb && cb();
+    };
+    requestAnimationFrame(step);
+}
+
+ctrlBtn.addEventListener('click', () => {
+    if (!running) {
+        running = true;
+        elapsed = 0; // Reset timer when starting
+        bigTimer.textContent = "00:00";
+        ctrlBtn.textContent = 'STOP';
+        animateRing(document.querySelector('#startRing circle'), 0, 942, 1000, () => {
+            document.querySelector('#startRing').style.opacity = 0.3;
+            timerInt = setInterval(updateTimer, 1000);
+            tickInt = setInterval(() => !muted && tickSound.play(), 1000);
+            setInterval(runClk, 1000);
+            runClk();
+        });
+    } else {
+        running = false;
+        clearInterval(timerInt);
+        clearInterval(tickInt);
+        ctrlBtn.textContent = 'START';
+    }
+});
+
+muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    muteBtn.textContent = muted ? '🔇' : '🔊';
+});
+
+/* ---------- INITIALIZE ---------- */
+createParticles();
+setTimeout(() => {
+    motivationBox.textContent = "Ready to start your productive session? Click START to begin!";
+    motivationBox.classList.add('show');
+    setTimeout(() => {
+        motivationBox.classList.remove('show');
+    }, 5000);
+}, 1000);
+
+// Show AI teacher prompt every 30 seconds
+setInterval(() => {
+    if (!doubtModal.style.display || doubtModal.style.display === 'none') {
+        doubtBtn.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            doubtBtn.style.transform = 'scale(1)';
+        }, 300);
+    }
+}, 30000);
+</script>
+</body>
+</html>
